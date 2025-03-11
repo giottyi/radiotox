@@ -1,0 +1,9 @@
+[project]
+name = "radiotom"
+version = "0.1.0"
+description = "Simple X-Ray CT reconstruction package"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.2.3",
+]
