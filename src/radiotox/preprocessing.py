@@ -9,6 +9,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 def read_image(view_path, views_stack, views_angles, index, lock):
+    """
+    check get_views
+    """
     view = cv.imread(view_path, cv.IMREAD_GRAYSCALE | cv.IMREAD_ANYDEPTH)
     if view is None:
         print(f"Warning: Failed to read {view_path}")
@@ -20,6 +23,10 @@ def read_image(view_path, views_stack, views_angles, index, lock):
 
 
 def get_views(directory):
+    """
+    reads data using ThreadPoolExecutor and returns angles and 
+    projections stack maintaining precision of the latter
+    """
     views_paths = sorted(glob.glob(os.path.join(directory, "*.tif")))
     if not views_paths:
         raise ValueError("No TIFF files found in directory.")
@@ -45,16 +52,23 @@ def get_views(directory):
 
 
 def get_flat(directory):
+    """
+    averages flats without accounting for afterglow maintaining precision
+    used in minus log correction
+    """
     _, flats_stack = get_views(directory)
     return np.mean(flats_stack, axis=0).astype(flats_stack.dtype)
 
 
 def main():
+    """
+    currently crops dataset to reconstruct with astra
+    """
     flat_directory, views_directory = sys.argv[1], sys.argv[2]
     flat = get_flat(flat_directory)
     _, views = get_views(views_directory)
-    a = -np.log(views/flat)
-    #cv.imwrite("cropped_normalized.tif", (views[0]/flat)[700:,700:2000])
+    np.save("cropped_data.npy", \
+            (-np.log(views/flat)[:,700:,700:2000]).astype(np.float32))
 
 
 if __name__ == "__main__":
