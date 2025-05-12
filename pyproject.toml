@@ -1,9 +1,11 @@
 [project]
-name = "radiotom"
+name = "radiotox"
 version = "0.1.0"
 description = "Simple X-Ray CT reconstruction package"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "numpy>=2.2.3",
+    "jax>=0.6.0",
+    "matplotlib>=3.10.3",
+    "opencv-python>=4.11.0.86",
 ]
