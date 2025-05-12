@@ -4,29 +4,9 @@ import numpy as np
 import glob
 import os
 import sys
-from threading import Lock
-from concurrent.futures import ThreadPoolExecutor
-
-
-def read_image(view_path, views_stack, views_angles, index, lock):
-    """
-    check get_views
-    """
-    view = cv.imread(view_path, cv.IMREAD_GRAYSCALE | cv.IMREAD_ANYDEPTH)
-    if view is None:
-        print(f"Warning: Failed to read {view_path}")
-        return
-    angle = int(view_path.split('.')[1].split('_')[2])
-    with lock:
-        views_stack[index] = view
-        views_angles[index] = angle
 
 
 def get_views(directory):
-    """
-    reads data using ThreadPoolExecutor and returns angles and 
-    projections stack maintaining precision of the latter
-    """
     views_paths = sorted(glob.glob(os.path.join(directory, "*.tif")))
     if not views_paths:
         raise ValueError("No TIFF files found in directory.")
@@ -41,19 +21,18 @@ def get_views(directory):
     views_stack = np.zeros((n_views, height, width), dtype=sample_view.dtype)
     views_angles = np.zeros(n_views, dtype=int)
 
-    lock = Lock()
-    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
-        futures = [
-            executor.submit(read_image, path, views_stack, views_angles, i, lock)
-            for i, path in enumerate(views_paths)]
-        for future in futures:
-            future.result()
+    views_stack[0] = sample_view
+    views_angles[0] = int(views_paths[0].split('.')[1].split('_')[2])
+    for i, view_path in enumerate(views_paths[1:], start=1):
+        views_stack[i] = cv.imread(view_path, \
+                cv.IMREAD_GRAYSCALE | cv.IMREAD_ANYDEPTH)
+        views_angles[i] = int(view_path.split('.')[1].split('_')[2])
     return views_angles, views_stack
 
 
 def get_flat(directory):
     """
-    averages flats without accounting for afterglow maintaining precision
+    averages flats without accounting for afterglow maintaining precision,
     used in minus log correction
     """
     _, flats_stack = get_views(directory)
