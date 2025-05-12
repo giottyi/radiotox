@@ -9,7 +9,6 @@ dependencies = [
     "matplotlib>=3.10.3",
     "numpy>=2.2.5",
     "opencv-python>=4.11.0.86",
-    "tifffile>=2025.5.10",
 ]
 
 [tool.setuptools.packages.find]
