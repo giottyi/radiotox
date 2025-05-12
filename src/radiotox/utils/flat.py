@@ -1,5 +1,5 @@
-import jax.numpy as jnp
-import matplotlib.pyplot as plt
+import cv2 as cv
+import numpy as np
 
 import glob
 import os
@@ -10,7 +10,7 @@ from radiotox.utils.get_views import get_views
 
 def get_flat(directory):
     flats_stack = get_views(directory)
-    flats_mean = jnp.mean(flats_stack, axis=0)
+    flats_mean = np.mean(flats_stack, axis=0)
     return flats_mean
 
 
@@ -20,9 +20,7 @@ def main():
 
     directory = sys.argv[1]
     flat = get_flat(directory)
-    plt.imshow(flat, cmap="gray")
-    plt.axis("off")
-    plt.savefig("flat_mean.tif")
+    cv.imwrite("flat_mean.tif", np.array(flat))
 
 
 if __name__ == "__main__":

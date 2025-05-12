@@ -1,5 +1,5 @@
 import cv2 as cv
-import jax.numpy as jnp
+import numpy as np
 
 import glob
 import os
@@ -17,8 +17,8 @@ def get_views(directory):
             print(f"Warning: Failed to read {view_path}")
 
         if not views:
-            raise ValueError("No valid view images found.")
+            raise ValueError("No valid view images found. Check directory")
 
-    views_stack = jnp.stack(views, axis=0)
+    views_stack = np.stack(views, axis=0)
     return views_stack
 
