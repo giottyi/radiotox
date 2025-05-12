@@ -3,12 +3,13 @@ import numpy as np
 
 import glob
 import os
+import sys
 
 
 def get_views(directory):
     views_paths = sorted(glob.glob(os.path.join(directory, "*.tif")))
     if not views_paths:
-        raise ValueError("No TIFF files found in directory.") 
+        raise ValueError("No TIFF files found in directory.")
 
     sample_view = cv.imread(views_paths[0], \
             cv.IMREAD_GRAYSCALE | cv.IMREAD_ANYDEPTH)
@@ -31,4 +32,23 @@ def get_views(directory):
             print(f"Warning: Failed to read {view_path}")
 
     return views_angles, views_stack
+
+
+def get_flat(directory):
+    _, flats_stack = get_views(directory)
+    flats_mean = np.mean(flats_stack, axis=0).astype(flats_stack.dtype)
+    return flats_mean
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python utils/get_flat.py <directory>")
+
+    directory = sys.argv[1]
+    flat = get_flat(directory)
+    cv.imwrite("flat_mean.tif", flat)
+
+
+if __name__ == "__main__":
+    main()
 
