@@ -4,6 +4,13 @@ import numpy as np
 import glob
 import os
 import sys
+from threading import Lock
+from concurrent.futures import ThreadPoolExecutor
+
+
+def read_image(view_path, views_stack, views_angles, index, lock):
+    view = cv.imread(view_path, cv.IMREAD_GRAYSCALE | cv.IMREAD_ANYDEPTH)
+    pass
 
 
 def get_views(directory):
@@ -30,23 +37,20 @@ def get_views(directory):
             views_angles[i] = int(views_paths[i].split('.')[1].split('_')[2])
         else:
             print(f"Warning: Failed to read {view_path}")
-
     return views_angles, views_stack
 
 
 def get_flat(directory):
     _, flats_stack = get_views(directory)
-    flats_mean = np.mean(flats_stack, axis=0).astype(flats_stack.dtype)
-    return flats_mean
+    return np.mean(flats_stack, axis=0).astype(flats_stack.dtype)
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python utils/get_flat.py <directory>")
-
-    directory = sys.argv[1]
-    flat = get_flat(directory)
-    cv.imwrite("flat_mean.tif", flat)
+    flat_directory, views_directory = sys.argv[1], sys.argv[2]
+    flat = get_flat(flat_directory)
+    _, views = get_views(views_directory)
+    a = -np.log(views/flat)
+    #cv.imwrite("cropped_normalized.tif", (views[0]/flat)[700:,700:2000])
 
 
 if __name__ == "__main__":
